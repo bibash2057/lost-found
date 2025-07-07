@@ -4,17 +4,18 @@ const ItemSchema = new mongoose.Schema(
   {
     type: { type: String, emun: ["Lost", "Found"], required: true },
     title: { type: String, required: true },
+    des: { type: String, required: true },
     category: {
       type: String,
       enum: [
         "Bag",
         "Document",
         "Mobile",
+        "Laptop",
         "Electronics",
         "Jewelry",
         "Keys",
         "Wallet",
-        "Phone",
         "Pet",
         "Other",
       ],
@@ -29,7 +30,7 @@ const ItemSchema = new mongoose.Schema(
       lat: Number,
       lng: Number,
     },
-    date: { type: Date, required: true },
+
     postedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -37,7 +38,7 @@ const ItemSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Open", "Verifying", "Claimed", "Resolved"],
+      enum: ["Open", "Verifying", "Claimed"],
       default: "Open",
     },
     verificationQuestions: [

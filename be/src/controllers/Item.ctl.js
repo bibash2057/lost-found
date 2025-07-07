@@ -7,12 +7,12 @@ exports.reportItem = asyncHandler(async (req, res) => {
   const {
     type,
     title,
+    des,
     category,
     photos,
     location,
     coordinates,
     verificationQuestions,
-    date,
   } = req.body;
 
   if (!id || !mongoose.Types.ObjectId.isValid(id)) {
@@ -22,7 +22,7 @@ exports.reportItem = asyncHandler(async (req, res) => {
     });
   }
 
-  if (!type || !title || !category || !location || !date) {
+  if (!type || !title || !category || !location) {
     return res
       .status(400)
       .json({ message: "Please provide all required fields" });
@@ -44,12 +44,12 @@ exports.reportItem = asyncHandler(async (req, res) => {
   const newItem = new Item({
     type,
     title,
+    des,
     category,
     photos: photos || [],
     location,
     coordinates: coordinates || null,
     verificationQuestions: verificationQuestions || [],
-    date,
     postedBy: id,
     status: "Open",
   });
@@ -113,6 +113,20 @@ exports.getItemById = asyncHandler(async (req, res) => {
   });
 });
 
+exports.getMyReportedItems = asyncHandler(async (req, res) => {
+  const { id } = req.user;
+
+  const reportedItems = await Item.find({ postedBy: id })
+    .sort({ createdAt: -1 })
+    .select("-verificationQuestions -__v");
+
+  res.status(200).json({
+    success: true,
+    message: "Reported Items fetched successfully!",
+    data: reportedItems,
+  });
+});
+
 exports.delteItem = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
@@ -129,6 +143,13 @@ exports.delteItem = asyncHandler(async (req, res) => {
     return res.status(404).json({
       success: false,
       message: "Item not found",
+    });
+  }
+
+  if (item.postedBy.toString() !== req.user.id.toString()) {
+    return res.status(403).json({
+      success: false,
+      message: "Unauthorized - You can only delete items you created",
     });
   }
 

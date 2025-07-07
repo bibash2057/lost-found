@@ -30,7 +30,7 @@ exports.register = asyncHandler(async (req, res) => {
       .json({ success: false, message: "Password is required" });
   }
 
-  const existingUser = await User.findOne({ email, phone });
+  const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
   if (existingUser) {
     return res
       .status(401)
@@ -61,7 +61,7 @@ exports.register = asyncHandler(async (req, res) => {
 });
 
 exports.login = asyncHandler(async (req, res) => {
-  const { email, phone, password } = req.body;
+  const { phone, password } = req.body;
 
   const user = await User.findOne({ phone });
 

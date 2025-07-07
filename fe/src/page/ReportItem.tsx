@@ -1,3 +1,5 @@
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Select,
   SelectItem,
@@ -15,6 +17,28 @@ import ImportantTips from "@/components/common/ImportantTips";
 import ReportOption from "@/components/ReportItem/ReportOption";
 import { Form, FormItem, FormLabel } from "@/components/ui/form";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
+import usePost from "@/hooks/usePost";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+
+interface VerificationQuestion {
+  question: string;
+  answer: string;
+}
+
+interface ReportItemPayload {
+  type: "Lost" | "Found";
+  title: string;
+  des: string;
+  category: string;
+  location: string;
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
+  photos: string[];
+  verificationQuestions: VerificationQuestion[];
+}
 
 const CATEGORY_OPTIONS = [
   "Bag",
@@ -30,42 +54,63 @@ const CATEGORY_OPTIONS = [
 ];
 
 const ReportItem = () => {
-  const form = useForm({
+  const navigate = useNavigate();
+  const form = useForm<ReportItemPayload>({
     defaultValues: {
-      reportType: "",
+      type: "Lost",
       title: "",
-      description: "",
+      des: "",
       category: "",
-      date: "",
       location: "",
-      file: [],
+      photos: [],
       verificationQuestions: [{ question: "", answer: "" }],
     },
   });
 
-  const { control, handleSubmit } = form;
+  const { control, handleSubmit, reset } = form;
   const { fields, append, remove } = useFieldArray({
     control,
     name: "verificationQuestions",
   });
 
-  const onSubmit = async (data: any) => {
+  const { mutate } = usePost<any, ReportItemPayload>(
+    "/report",
+    ["report-item"],
+    {
+      onSuccess: (res) => {
+        console.log("res", res);
+
+        toast.success(res.data.message);
+        reset();
+        navigate("/");
+      },
+      onError: (err) => {
+        console.log("err", err);
+        toast.error("Item Add", {
+          description: err.response?.data?.message || "Please try again",
+        });
+      },
+    },
+    {}
+  );
+
+  const onSubmit = async (data: ReportItemPayload) => {
     const {
-      reportType,
+      type,
       title,
       des,
       category,
       location,
-      file,
+      photos,
       verificationQuestions,
     } = data;
 
-    const uploadedPhotos = file?.map((f: File) =>
+    const uploadedPhotos = photos?.map((f: any) =>
       typeof f === "string" ? f : URL.createObjectURL(f)
     );
 
     const payload = {
-      type: reportType === "lost" ? "Lost" : "Found",
+      type,
       title,
       des,
       category,
@@ -74,12 +119,12 @@ const ReportItem = () => {
         lat: 27.6976,
         lng: 85.3594,
       },
-      photos: uploadedPhotos,
-      postedBy: "60d0fe4f5b5e1f001c8c4f0c",
-      verificationQuestions,
+      photos: uploadedPhotos || [],
+      verificationQuestions: verificationQuestions || [],
     };
 
-    console.log("Payload to submit:", payload);
+    // console.log("Payload to submit:", payload);
+    mutate(payload);
   };
 
   return (
@@ -92,15 +137,15 @@ const ReportItem = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <ReportOption
-              name="reportType"
+              name="type"
               control={control}
-              value="lost"
+              value="Lost"
               title="Lost Item"
               description="I lost something"
               icon={<TriangleAlert className="w-6 h-6" />}
             />
             <ReportOption
-              name="reportType"
+              name="type"
               control={control}
               value="found"
               title="Found Item"

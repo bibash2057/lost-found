@@ -3,7 +3,7 @@ const asyncHandler = require("express-async-handler");
 
 exports.authenticateToken = asyncHandler(async (req, res, next) => {
   const authHeader = req.headers.Authorization || req.headers.authorization;
-  // console.log("authHeader", authHeader);
+  console.log("authHeader", authHeader);
 
   if (!authHeader || !authHeader.startsWith("Bearer")) {
     return res

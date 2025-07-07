@@ -1,4 +1,5 @@
 import {
+  Tag,
   Hand,
   Circle,
   MapPin,
@@ -8,17 +9,21 @@ import {
   CircleFadingArrowUp,
 } from "lucide-react";
 import Text from "./Text";
+import Delete from "./Delete";
 import { Badge } from "../ui/badge";
-import { Card, CardHeader, CardTitle } from "../ui/card";
 import { Link } from "react-router-dom";
+import { Card, CardHeader, CardTitle } from "../ui/card";
 
-const ItemsCard = ({ item }: any) => {
+const ItemsCard = ({ item, isDelete }: any) => {
   return (
-    <Card className="flex md:flex-col flex-row rounded-sm py-0 shadow-[0_0_0_1px_0.5px)]">
+    <Card className="flex md:flex-col flex-row rounded-sm py-0 shadow-none border-gray-50 bg-gray-50/20">
       <div className="h-52 w-full bg-muted/20">
         <img
-          src={item.photos}
-          alt={item.title}
+          src={
+            item.photos ||
+            "https://commons.wikimedia.org/wiki/File:No-Image-Placeholder.svg"
+          }
+          alt={item.title || "Photo"}
           className="w-full h-full object-contain"
         />
       </div>
@@ -61,6 +66,12 @@ const ItemsCard = ({ item }: any) => {
 
         <div className="space-y-1 pt-3">
           <div className="flex items-center gap-2 text-muted-foreground">
+            <Tag className="w-4 h-4 shrink-0 " />
+            <Text type="p" className="line-clamp-1 text-[13px]">
+              {item.category}
+            </Text>
+          </div>
+          <div className="flex items-center gap-2 text-muted-foreground">
             <MapPin className="w-4 h-4 shrink-0 " />
             <Text type="p" className="line-clamp-1 text-[13px]">
               {item.location}
@@ -69,13 +80,22 @@ const ItemsCard = ({ item }: any) => {
           <div className="flex items-center gap-1 text-muted-foreground">
             <Calendar className="w-4 h-4 shrink-0 " />
             <Text type="p" className="line-clamp-1 text-[13px] ">
-              {new Date(item.date).toLocaleDateString("en-US", {
+              {new Date(item.createdAt).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
                 year: "numeric",
               })}
             </Text>
           </div>
+          {isDelete && (
+            <Delete
+              title="Are You Sure?"
+              description="Do you really want to delete this item"
+              url={`/report/${item?._id}`}
+              itemKeys={["report-item"]}
+              id={item?._id}
+            />
+          )}
         </div>
       </CardHeader>
     </Card>

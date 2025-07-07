@@ -4,6 +4,7 @@ import Category from "@/components/common/Category";
 import ItemsCard from "@/components/common/ItemsCard";
 import { Plus, Search, SlidersHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
+import useFetch from "@/hooks/useFetch";
 
 const items = [
   {
@@ -108,6 +109,16 @@ const items = [
 ];
 
 const HomePage = () => {
+  const { data, isFetching, error } = useFetch("/report", ["report-item"]);
+  console.log("data", data);
+
+  if (isFetching) {
+    return <div>Loading reports...</div>;
+  }
+
+  if (error) {
+    return <div>Error loading reports: {error.message}</div>;
+  }
   return (
     <div className="py-3 space-y-6 relative">
       <div className="flex items-center justify-center gap-3">
@@ -141,8 +152,8 @@ const HomePage = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-4 gap-4">
-          {items?.map((item, index) => (
-            <ItemsCard item={item} key={index} />
+          {data?.data?.map((item: any) => (
+            <ItemsCard item={item} key={item?._id} />
           ))}
         </div>
       </div>
