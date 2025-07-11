@@ -137,14 +137,7 @@ exports.delteItem = asyncHandler(async (req, res) => {
     });
   }
 
-  const item = await Item.findByIdAndDelete(id);
-
-  if (!item) {
-    return res.status(404).json({
-      success: false,
-      message: "Item not found",
-    });
-  }
+  const item = await Item.findById(id);
 
   if (item.postedBy.toString() !== req.user.id.toString()) {
     return res.status(403).json({
@@ -152,13 +145,20 @@ exports.delteItem = asyncHandler(async (req, res) => {
       message: "Unauthorized - You can only delete items you created",
     });
   }
+  if (!item) {
+    return res.status(404).json({
+      success: false,
+      message: "Item not found",
+    });
+  }
 
+  const deleteItem = await Item.findByIdAndDelete(id);
   res.status(200).json({
     success: true,
     message: "Reported item deleted successfully",
     data: {
-      id: item._id,
-      title: item.title,
+      id: deleteItem._id,
+      title: deleteItem.title,
     },
   });
 });

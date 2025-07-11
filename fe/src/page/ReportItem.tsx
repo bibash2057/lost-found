@@ -171,6 +171,7 @@ const ReportItem = () => {
             placeholder="e.g. Blue Nike Backpack"
             note="Be specific with brand names if known"
           />
+
           <FormInput
             name="des"
             label="Description *"

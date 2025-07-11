@@ -96,6 +96,13 @@ const ItemsCard = ({ item, isDelete }: any) => {
               id={item?._id}
             />
           )}
+          <Delete
+            title="Are You Sure?"
+            description="Do you really want to delete this item"
+            url={`/report/${item?._id}`}
+            itemKeys={["report-item"]}
+            id={item?._id}
+          />
         </div>
       </CardHeader>
     </Card>
