@@ -20,7 +20,7 @@ const ItemsCard = ({ item, isDelete }: any) => {
       <div className="h-52 w-full bg-muted/20">
         <img
           src={
-            item.photos ||
+            item.photos?.[0] ??
             "https://commons.wikimedia.org/wiki/File:No-Image-Placeholder.svg"
           }
           alt={item.title || "Photo"}
@@ -28,7 +28,7 @@ const ItemsCard = ({ item, isDelete }: any) => {
         />
       </div>
       <CardHeader className="w-full px-2.5 py-8 md:py-1 md:mb-8">
-        <Link to="/item/1">
+        <Link to={`/${item?._id}`}>
           <CardTitle className="text-lg font-medium leading-snug line-clamp-2 md:h-12">
             {item.title}
           </CardTitle>
@@ -96,13 +96,6 @@ const ItemsCard = ({ item, isDelete }: any) => {
               id={item?._id}
             />
           )}
-          <Delete
-            title="Are You Sure?"
-            description="Do you really want to delete this item"
-            url={`/report/${item?._id}`}
-            itemKeys={["report-item"]}
-            id={item?._id}
-          />
         </div>
       </CardHeader>
     </Card>

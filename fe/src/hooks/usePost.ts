@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 const usePost = <TData, TVariables = any>(
   url: string,
-  key: (string | number)[],
+  key: [string],
   options: UseMutationOptions<AxiosResponse<TData>, any, TVariables> = {},
   config: AxiosRequestConfig = {}
 ) => {

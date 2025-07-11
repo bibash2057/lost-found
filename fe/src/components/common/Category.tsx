@@ -16,20 +16,25 @@ import { Button } from "../ui/button";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 const category = [
-  { name: "All", icon: List },
-  { name: "Bag", icon: BriefcaseBusiness },
-  { name: "Document", icon: StickyNote },
-  { name: "Mobile", icon: Smartphone },
-  { name: "Laptop", icon: Laptop },
-  { name: "Electronics", icon: Cable },
-  { name: "Jewelry", icon: Gem },
-  { name: "Keys", icon: Key },
-  { name: "Wallet", icon: Wallet },
-  { name: "Pet", icon: Dog },
-  { name: "Other", icon: Grid2x2 },
+  { name: "All", value: "", icon: List },
+  { name: "Bag", value: "Bag", icon: BriefcaseBusiness },
+  { name: "Document", value: "Document", icon: StickyNote },
+  { name: "Mobile", value: "Mobile", icon: Smartphone },
+  { name: "Laptop", value: "Laptop", icon: Laptop },
+  { name: "Electronics", value: "Electronics", icon: Cable },
+  { name: "Jewelry", value: "Jewelry", icon: Gem },
+  { name: "Keys", value: "Keys", icon: Key },
+  { name: "Wallet", value: "Wallet", icon: Wallet },
+  { name: "Pet", value: "Pet", icon: Dog },
+  { name: "Other", value: "Other", icon: Grid2x2 },
 ];
 
-const Category = () => {
+type categoryProps = {
+  setCategory: (category: string) => void;
+  categories: string;
+};
+
+const Category = ({ setCategory, categories }: categoryProps) => {
   return (
     <div className="space-y-3">
       <Text type="subTitle" className="text-lg font-medium">
@@ -40,8 +45,13 @@ const Category = () => {
           {category?.map((item, index) => (
             <Button
               key={index}
+              onClick={() => setCategory(item?.value)}
               variant="outline"
-              className="flex items-center justify-center rounded-3xl px-4 py-3 gap-1 border-muted hover:border-primary/40"
+              className={`${
+                categories === item?.value
+                  ? "bg-gray-200 border-primary/40"
+                  : "border-muted"
+              } flex items-center justify-center rounded-3xl px-4 py-3 gap-1  hover:border-primary/40`}
             >
               <item.icon className="md:w-6 w-5 md:h-6 h-5 text-primary/70" />
               <span className="text-[11px] md:text-[13px] font-medium text-muted-foreground">

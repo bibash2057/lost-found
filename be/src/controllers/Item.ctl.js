@@ -1,6 +1,7 @@
 const Item = require("../models/Item.models");
 const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
+const uploadToCloudinary = require("../utils/cloudinaryUpload");
 
 exports.reportItem = asyncHandler(async (req, res) => {
   const { id } = req.user;
@@ -9,7 +10,6 @@ exports.reportItem = asyncHandler(async (req, res) => {
     title,
     des,
     category,
-    photos,
     location,
     coordinates,
     verificationQuestions,
@@ -28,16 +28,32 @@ exports.reportItem = asyncHandler(async (req, res) => {
       .json({ message: "Please provide all required fields" });
   }
 
-  if (verificationQuestions && verificationQuestions.length > 0) {
-    const invalidQuestions = verificationQuestions.some(
-      (q) => !q.question || !q.answer
-    );
+  if (type === "Found") {
+    if (verificationQuestions && verificationQuestions.length > 0) {
+      const invalidQuestions = verificationQuestions.some(
+        (q) => !q.question || !q.answer
+      );
 
-    if (invalidQuestions) {
-      return res.status(400).json({
-        success: false,
-        message: "Verification questions must have both question and answer",
-      });
+      if (invalidQuestions) {
+        return res.status(400).json({
+          success: false,
+          message: "Verification questions must have both question and answer",
+        });
+      }
+    }
+  }
+
+  let uploadedPhotoURLs = [];
+
+  if (req.files && req.files.length > 0) {
+    try {
+      console.log("Req", req.file);
+      uploadedPhotoURLs = await Promise.all(
+        req.files.map((file) => uploadToCloudinary(file.buffer))
+      );
+    } catch (err) {
+      console.error("Cloudinary upload failed:", err);
+      return res.status(500).json({ message: "Image upload failed" });
     }
   }
 
@@ -46,7 +62,7 @@ exports.reportItem = asyncHandler(async (req, res) => {
     title,
     des,
     category,
-    photos: photos || [],
+    photos: uploadedPhotoURLs,
     location,
     coordinates: coordinates || null,
     verificationQuestions: verificationQuestions || [],
@@ -69,7 +85,7 @@ exports.getAllItem = asyncHandler(async (req, res) => {
   let query = {};
   if (type) query.type = type;
   if (status) query.status = status;
-  if (category) query.type = category;
+  if (category) query.category = category;
 
   if (search) {
     query.$or = [

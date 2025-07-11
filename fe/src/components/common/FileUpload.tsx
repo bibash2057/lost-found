@@ -12,6 +12,7 @@ import { Label } from "../ui/label";
 import { cn } from "@/lib/utils";
 import type { Control } from "react-hook-form";
 import { CloudUpload } from "lucide-react";
+import { toast } from "sonner";
 
 type FileUploadPropsType = {
   name: string;
@@ -47,16 +48,18 @@ const FileUpload = ({
   }, []);
 
   const handleDrop = useCallback(
-    (
-      e: React.DragEvent<HTMLDivElement>,
-      onChange: (file: File | null) => void
-    ) => {
+    (e: React.DragEvent<HTMLDivElement>, onChange: (files: File[]) => void) => {
       e.preventDefault();
       e.stopPropagation();
-
       setDragActive(false);
-      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-        onChange(e.dataTransfer.files[0]);
+
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        const files = Array.from(e.dataTransfer.files);
+        if (files.length > 5) {
+          toast.error("Maximum 5 files allowed");
+          return;
+        }
+        onChange(files);
       }
     },
     []
@@ -77,7 +80,7 @@ const FileUpload = ({
             onDragLeave={handleDrag}
             onDrop={(e) => handleDrop(e, field.onChange)}
             className={cn(
-              "border-dashed border rounded-md border-[#A6ABC8] flex flex-col justify-center items-center h-64 transition-colors",
+              "border-dashed border rounded-md border-[#A6ABC8] flex flex-col justify-center items-center h-72 transition-colors",
               dragActive && "bg-gray-100 border-blue-500"
             )}
           >
@@ -94,15 +97,29 @@ const FileUpload = ({
             <FormControl>
               <Input
                 hidden
+                multiple
                 type="file"
                 ref={inputRef}
                 id="file-upload"
                 accept={accept}
                 onChange={(e) => {
                   if (e.target.files && e.target.files.length > 0) {
-                    field.onChange(e.target.files[0]);
-                  } else {
-                    field.onChange(null);
+                    const files = Array.from(e.target.files);
+                    if (files.length > 5) {
+                      toast.error("Maximum 5 files allowed");
+                      return;
+                    }
+                    if (field.value && field.value.length + files.length > 5) {
+                      toast.error(
+                        `You can only upload ${
+                          5 - field.value.length
+                        } more files`
+                      );
+                      return;
+                    }
+                    field.onChange(
+                      field.value ? [...field.value, ...files] : files
+                    );
                   }
                 }}
               />
@@ -114,13 +131,22 @@ const FileUpload = ({
               Choose Files
             </Label>
 
-            <Text className="text-sm text-gray-400 mt-3">
-              Maximum 5 images (PNG, JPG up to 5MB each)
+            <Text className="text-sm text-gray-400 mt-3 text-center">
+              You can select multiple images. <br /> Maximum 5 images (PNG, JPG
+              up to 5MB each)
             </Text>
-            {field.value?.name && (
-              <Text type="caption" className="mt-2">
-                Selected File: {field.value.name}
-              </Text>
+            {Array.isArray(field.value) && (
+              <div className="mt-2 text-sm text-gray-600">
+                {field.value.map((file: File, index: number) => (
+                  <Text
+                    key={file.name + index}
+                    type="caption"
+                    className="mt-2 text-sm truncate max-w-xs"
+                  >
+                    Selected File is: {file.name}
+                  </Text>
+                ))}
+              </div>
             )}
           </div>
 

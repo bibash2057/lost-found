@@ -1,19 +1,18 @@
-import { Separator } from "@radix-ui/react-separator";
-import { Bell } from "lucide-react";
-import { Button } from "../ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
+  DropdownMenuContent,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
+import { toast } from "sonner";
+import { Bell } from "lucide-react";
+import { Button } from "../ui/button";
 import { useAuth } from "@/store/useAuth";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { Separator } from "@radix-ui/react-separator";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 const Nav = () => {
   const { logOut, isLoggedIn } = useAuth();
@@ -23,26 +22,17 @@ const Nav = () => {
     <nav className="flex h-16 items-center justify-between border-b px-5 py-2 w-full sticky top-0 right-0 left-0 z-50 bg-white">
       <div className="flex items-center gap-4">
         <Separator orientation="vertical" className="h-6" />
-        {/* <p>Lost and Found</p> */}
-
-        <div className="flex items-center gap-2">
-          <Button variant="outline" className="text-sm font-medium ">
-            <span className="">Lost</span>
-            <span className="flex items-center justify-center size-5 rounded-sm bg-primary/75 text-xs text-white">
-              3
-            </span>
-          </Button>
-          <Button variant="outline" className="text-sm font-medium">
-            <span className="">Found</span>
-            <span className="flex items-center justify-center size-5 rounded-sm bg-primary/75 text-xs text-white">
-              0
-            </span>
-          </Button>
-        </div>
+        <Link to={"/"}>
+          <p>Lost and Found </p>
+        </Link>
+        <span>\</span>
       </div>
 
       {isLoggedIn ? (
         <div className="flex items-center gap-4">
+          <Link to={"/reportItem"}>
+            <Button>Report Item</Button>
+          </Link>
           <Button variant="ghost" size="icon" className="relative">
             <Bell />
           </Button>

@@ -1,5 +1,4 @@
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import {
   Select,
   SelectItem,
@@ -7,19 +6,18 @@ import {
   SelectTrigger,
   SelectContent,
 } from "@/components/ui/select";
+import usePost from "@/hooks/usePost";
 import Text from "@/components/common/Text";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import FormInput from "@/components/common/FormInput";
+import { Separator } from "@/components/ui/separator";
 import FileUpload from "@/components/common/FileUpload";
 import { TriangleAlert, HandHeart } from "lucide-react";
 import ImportantTips from "@/components/common/ImportantTips";
 import ReportOption from "@/components/ReportItem/ReportOption";
 import { Form, FormItem, FormLabel } from "@/components/ui/form";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
-import usePost from "@/hooks/usePost";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 
 interface VerificationQuestion {
   question: string;
@@ -36,7 +34,7 @@ interface ReportItemPayload {
     lat: number;
     lng: number;
   };
-  photos: string[];
+  photos: File[];
   verificationQuestions: VerificationQuestion[];
 }
 
@@ -67,13 +65,13 @@ const ReportItem = () => {
     },
   });
 
-  const { control, handleSubmit, reset } = form;
+  const { control, handleSubmit, reset, watch } = form;
   const { fields, append, remove } = useFieldArray({
     control,
     name: "verificationQuestions",
   });
 
-  const { mutate } = usePost<any, ReportItemPayload>(
+  const { mutate, isPending } = usePost<any, FormData>(
     "/report",
     ["report-item"],
     {
@@ -91,40 +89,33 @@ const ReportItem = () => {
         });
       },
     },
-    {}
+    { headers: { "Content-Type": "multipart/form-data" } }
   );
 
   const onSubmit = async (data: ReportItemPayload) => {
-    const {
-      type,
-      title,
-      des,
-      category,
-      location,
-      photos,
-      verificationQuestions,
-    } = data;
+    const formData = new FormData();
+    formData.append("type", data.type);
+    formData.append("title", data.title);
+    formData.append("des", data.des);
+    formData.append("category", data.category);
+    formData.append("location", data.location);
 
-    const uploadedPhotos = photos?.map((f: any) =>
-      typeof f === "string" ? f : URL.createObjectURL(f)
-    );
+    // formData.append("coordinates[lat]", data.coordinates.lat.toString());
+    // formData.append("coordinates[lng]", data.coordinates.lng.toString());
 
-    const payload = {
-      type,
-      title,
-      des,
-      category,
-      location,
-      coordinates: {
-        lat: 27.6976,
-        lng: 85.3594,
-      },
-      photos: uploadedPhotos || [],
-      verificationQuestions: verificationQuestions || [],
-    };
+    data.verificationQuestions.forEach((q, idx) => {
+      formData.append(`verificationQuestions[${idx}][question]`, q.question);
+      formData.append(`verificationQuestions[${idx}][answer]`, q.answer);
+    });
 
-    // console.log("Payload to submit:", payload);
-    mutate(payload);
+    if (data.photos && data.photos.length > 0) {
+      data.photos.forEach((file) => {
+        formData.append("photos", file);
+      });
+    }
+
+    console.log("formData", formData);
+    mutate(formData);
   };
 
   return (
@@ -147,7 +138,7 @@ const ReportItem = () => {
             <ReportOption
               name="type"
               control={control}
-              value="found"
+              value="Found"
               title="Found Item"
               description="I found something"
               icon={<HandHeart className="w-6 h-6" />}
@@ -236,71 +227,75 @@ const ReportItem = () => {
           </Text>
           <Separator />
           <FileUpload
-            name="file"
+            name="photos"
             label="Upload Images"
             control={control}
             required={false}
           />
 
-          <div className="bg-purple-50 border border-purple-200 rounded-md p-4 mb-6">
-            <Text className="text-sm font-semibold text-purple-800">
-              Verification Question
-            </Text>
-            <Text className="mt-2 space-y-1 text-sm text-purple-700 list-disc list-inside">
-              Add a question that only the true owner could answer. This helps
-              verify legitimate claims.
-            </Text>
-            {fields.map((field, index) => (
-              <div
-                key={field.id}
-                className="py-3 space-y-2  px-4 rounded-md mt-4 border"
-              >
-                <FormInput
-                  name={`verificationQuestions.${index}.question`}
-                  label={`Security Question ${index + 1} *`}
-                  required
-                  control={control}
-                  placeholder="e.g. What’s the serial number? What’s unique about it?"
-                  labelClassName="text-xs"
-                  className="bg-white"
-                />
-                <FormInput
-                  name={`verificationQuestions.${index}.answer`}
-                  label="Correct Answer *"
-                  required
-                  control={control}
-                  placeholder="Enter the answer to your security question"
-                  labelClassName="text-xs"
-                  className="bg-white"
-                />
-                {index > 0 && (
-                  <Button
-                    variant="default"
-                    type="button"
-                    onClick={() => remove(index)}
-                    className="text-xs mt-2 bg-red-400"
-                  >
-                    Remove Question
-                  </Button>
-                )}
-              </div>
-            ))}
+          {watch("type") === "Found" && (
+            <div className="bg-purple-50 border border-purple-200 rounded-md p-4 mb-6">
+              <Text className="text-sm font-semibold text-purple-800">
+                Verification Question
+              </Text>
+              <Text className="mt-2 space-y-1 text-sm text-purple-700 list-disc list-inside">
+                Add a question that only the true owner could answer. This helps
+                verify legitimate claims.
+              </Text>
+              {fields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="py-3 space-y-2  px-4 rounded-md mt-4 border"
+                >
+                  <FormInput
+                    name={`verificationQuestions.${index}.question`}
+                    label={`Security Question ${index + 1} *`}
+                    required
+                    control={control}
+                    placeholder="e.g. What’s the serial number? What’s unique about it?"
+                    labelClassName="text-xs"
+                    className="bg-white"
+                  />
+                  <FormInput
+                    name={`verificationQuestions.${index}.answer`}
+                    label="Correct Answer *"
+                    required
+                    control={control}
+                    placeholder="Enter the answer to your security question"
+                    labelClassName="text-xs"
+                    className="bg-white"
+                  />
+                  {index > 0 && (
+                    <Button
+                      variant="default"
+                      type="button"
+                      onClick={() => remove(index)}
+                      className="text-xs mt-2 bg-red-400"
+                    >
+                      Remove Question
+                    </Button>
+                  )}
+                </div>
+              ))}
 
-            <Button
-              type="button"
-              onClick={() => append({ question: "", answer: "" })}
-              className="mt-4"
-              variant="secondary"
-            >
-              + Add Another Question
-            </Button>
-          </div>
+              <Button
+                type="button"
+                onClick={() => append({ question: "", answer: "" })}
+                className="mt-4"
+                variant="secondary"
+              >
+                + Add Another Question
+              </Button>
+            </div>
+          )}
 
           <div className="flex justify-between">
             <Button variant={"secondary"} type="button">
               Cancel
             </Button>
-            <Button type="submit">Submit</Button>
+            <Button type="submit" disabled={isPending}>
+              Submit
+            </Button>
           </div>
         </form>
       </Form>

@@ -69,7 +69,6 @@ const LoginPage = () => {
   );
 
   const onSubmit = (data: LoginFormValue) => {
-    // console.log("", data);
     mutate(data);
   };
 

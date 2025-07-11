@@ -3,19 +3,14 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const db = require("./src/db/db");
 const express = require("express");
+const cloudinary = require("cloudinary");
+
 const { notFound, errorHandler } = require("./src/middleware/error-handler");
 
 const PORT = 8000;
 const app = express();
 
 db.connectDB();
-
-// .then(() => {
-//   seedSidebar().catch((err) => {
-//     console.error("Error seeding sidebar:", err);
-//     // process.exit(1);
-//   });
-// });
 
 app.use(cors());
 app.use(helmet());
@@ -27,6 +22,11 @@ require("./src/models/index");
 
 app.use(notFound);
 app.use(errorHandler);
+
+// cloudinary.api.ping((error, result) => {
+//   if (error) console.error("Cloudinary connection error:", error);
+//   else console.log("Cloudinary connection successful:", result);
+// });
 
 app.get("/", (req, res) => {
   res.send("Server is healthy");

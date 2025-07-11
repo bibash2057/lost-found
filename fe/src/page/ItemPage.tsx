@@ -1,56 +1,115 @@
-import { Badge } from "@/components/ui/badge";
-import Text from "@/components/common/Text";
 import {
-  Clock,
-  TriangleAlert,
-  Circle,
+  Gem,
+  Hand,
   User,
+  Clock,
+  Circle,
   MapPin,
   Calendar,
-  Gem,
+  SearchCheck,
+  TriangleAlert,
+  CircleFadingArrowUp,
 } from "lucide-react";
+import useFetch from "@/hooks/useFetch";
+import Text from "@/components/common/Text";
+import { useParams } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { ReactNode } from "react";
-
-const item = {
-  title: "Silver Watch",
-  type: "Lost",
-  status: "Open",
-  category: "Jewelry",
-  location: "Gym",
-  date: "3 days ago",
-  description:
-    "A silver Rolex watch with a metal band. Lost in the locker room at the gym. The watch has a blue face and a date display. There's a small scratch on the glass and the back has an engraving.",
-};
+import { useState, type ReactNode } from "react";
 
 const ItemPage = () => {
+  const { id } = useParams();
+  const [selectedImage, setSelectedImage] = useState(0);
+
+  const { data, isFetching, error } = useFetch(`/report/${id}`, [
+    "report",
+    `${id}`,
+  ]);
+  console.log("data", data);
+
+  if (isFetching) {
+    return <div>Loading reports...</div>;
+  }
+
+  if (error) {
+    return <div>Error loading reports: {error.message}</div>;
+  }
+
   return (
     <div className="max-w-6xl mx-auto py-10 px-4 md:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
       <div className="md:col-span-2 space-y-6">
         <div className="aspect-video w-full bg-gray-100 overflow-hidden rounded-lg">
           <img
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkbTcqDNKzbvGK1gVJ50AFcfrthHdaxxWcwQ&s"
-            alt="Silver Watch"
-            className="w-full h-full object-cover object-center"
+            src={
+              data?.data.photos?.[selectedImage] ||
+              "https://commons.wikimedia.org/wiki/File:No-Image-Placeholder.svg"
+            }
+            alt={data?.data.photos?.[selectedImage]}
+            className="w-full h-full object-contain object-center"
           />
         </div>
-
+        <div className="w-full h-28 rounded-md border whitespace-nowrap">
+          <div className="flex w-max space-x-4 p-4">
+            {data?.data?.photos?.map((photo: string, index: number) => (
+              <div
+                key={index}
+                onClick={() => setSelectedImage(index)}
+                className={`h-20 w-30 rounded-md overflow-hidden border-2 ${
+                  selectedImage === index
+                    ? "border-primary/40"
+                    : "border-transparent"
+                }`}
+              >
+                <img
+                  src={photo}
+                  alt={`Thumbnail ${index + 1}`}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Text className="text-2xl font-semibold">{item.title}</Text>
+            <Text className="text-2xl font-semibold">{data?.data?.title}</Text>
             <div className="text-sm text-gray-500 flex items-center gap-1">
               <Clock className="w-4 h-4" />
-              {item.date}
+              {new Date(data?.data?.createdAt).toDateString()}
             </div>
           </div>
           <div className="flex gap-2">
-            <Badge variant="red" className="text-xs rounded-2xl px-2 py-0.5">
-              <TriangleAlert className="w-3 h-3 mr-1" />
-              Lost Item
+            <Badge
+              variant={data?.data.type === "Lost" ? "red" : "purple"}
+              className={`text-[11px] px-2 py-0.5 rounded-2xl`}
+            >
+              {data?.data.type === "Lost" && (
+                <TriangleAlert className="h-3 w-3" />
+              )}
+              {data?.data.type === "Found" && (
+                <SearchCheck className="h-3 w-3" />
+              )}
+
+              {data?.data.type}
             </Badge>
-            <Badge variant="blue" className="text-xs rounded-2xl px-2 py-0.5">
-              <Circle className="w-3 h-3 mr-1" />
-              Status: {item.status}
+
+            <Badge
+              variant={
+                data?.data?.status === "Open"
+                  ? "blue"
+                  : data?.data?.status === "Claimed"
+                  ? "green"
+                  : data?.data?.status === "Verifying"
+                  ? "yellow"
+                  : "blue"
+              }
+              className={`text-[11px] px-2 py-0.5 rounded-2xl ${""}`}
+            >
+              {data?.data?.status === "Open" && <Circle className="h-3 w-3" />}
+              {data?.data?.status === "Claimed" && <Hand className="h-3 w-3" />}
+              {data?.data?.status === "Verifying" && (
+                <CircleFadingArrowUp className="h-3 w-3" />
+              )}
+              {data?.data?.status}
             </Badge>
           </div>
         </div>
@@ -59,28 +118,32 @@ const ItemPage = () => {
           <h3 className="text-lg font-medium text-[#2D3E50] mb-2">
             Description
           </h3>
-          <p className="text-gray-700 text-sm">{item.description}</p>
+          <p className="text-gray-700 text-sm">{data?.data?.des}</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <InfoCard
             title="Category"
-            value={item.category}
+            value={data?.data?.category}
             icon={<Gem className="h-4 w-4" />}
           />
           <InfoCard
             title="Location"
-            value={item.location}
+            value={data?.data?.location}
             icon={<MapPin className="h-4 w-4" />}
           />
           <InfoCard
             title="Date"
-            value={item.date}
+            value={new Date(data?.data?.createdAt).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "2-digit",
+            })}
             icon={<Calendar className="h-4 w-4" />}
           />
           <InfoCard
             title="Status"
-            value={item.type}
+            value={data?.data?.type}
             icon={<TriangleAlert className="h-4 w-4" />}
           />
         </div>
@@ -120,18 +183,33 @@ const ItemPage = () => {
           <div className="flex items-center gap-3 mb-4">
             <User className="w-5 h-5 text-gray-600" />
             <div>
-              <p className="text-sm font-semibold">John Doe</p>
-              <p className="text-xs text-gray-500">Member since 2023</p>
+              <p className="text-sm font-semibold">
+                {data?.data?.postedBy?.name}
+              </p>
+              {/* <p className="text-xs text-gray-500">Member since 2023</p> */}
             </div>
           </div>
 
           <div className="mb-3">
             <Text className="text-sm font-medium mb-1">Item Status</Text>
             <Badge
-              variant="outline"
-              className="text-blue-600 border-blue-300 text-xs rounded-2xl"
+              variant={
+                data?.data?.status === "Open"
+                  ? "blue"
+                  : data?.data?.status === "Claimed"
+                  ? "green"
+                  : data?.data?.status === "Verifying"
+                  ? "yellow"
+                  : "blue"
+              }
+              className={`text-[11px] px-2 py-0.5 rounded-2xl ${""}`}
             >
-              Open
+              {data?.data?.status === "Open" && <Circle className="h-3 w-3" />}
+              {data?.data?.status === "Claimed" && <Hand className="h-3 w-3" />}
+              {data?.data?.status === "Verifying" && (
+                <CircleFadingArrowUp className="h-3 w-3" />
+              )}
+              {data?.data?.status}
             </Badge>
           </div>
 
