@@ -45,9 +45,10 @@ const Nav = () => {
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
+              {/* <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator /> */}
               <DropdownMenuItem>Profile</DropdownMenuItem>
+
               <DropdownMenuItem>
                 <Link to={"/myReport"}>Reported Items</Link>
               </DropdownMenuItem>

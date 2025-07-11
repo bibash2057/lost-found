@@ -289,12 +289,9 @@ const ReportItem = () => {
             </div>
           )}
 
-          <div className="flex justify-between">
-            <Button variant={"secondary"} type="button">
-              Cancel
-            </Button>
+          <div className="flex justify-end">
             <Button type="submit" disabled={isPending}>
-              Submit
+              {isPending ? "Submitting..." : "Submit"}
             </Button>
           </div>
         </form>

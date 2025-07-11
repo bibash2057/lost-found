@@ -9,6 +9,7 @@ import AuthLayout from "./layout/AuthLayout";
 import LoginPage from "./page/LoginPage";
 import RegisterPage from "./page/RegisterPage";
 import MyReport from "./page/MyReport";
+import ClaimReport from "./page/ClaimReport";
 
 const router = createBrowserRouter([
   {
@@ -18,8 +19,9 @@ const router = createBrowserRouter([
     children: [
       { path: "/", element: <HomePage /> },
       { path: "/:id", element: <ItemPage /> },
-      { path: "/reportItem", element: <ReportItem /> },
       { path: "/myReport", element: <MyReport /> },
+      { path: "/reportItem", element: <ReportItem /> },
+      { path: "/claimReport/:id", element: <ClaimReport /> },
     ],
   },
 

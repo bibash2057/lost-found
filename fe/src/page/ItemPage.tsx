@@ -16,16 +16,22 @@ import { useParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useState, type ReactNode } from "react";
+import ClaimItem from "@/components/ClaimItem";
+import { useAuth } from "@/store/useAuth";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const ItemPage = () => {
   const { id } = useParams();
   const [selectedImage, setSelectedImage] = useState(0);
+  const { userInfo } = useAuth();
 
   const { data, isFetching, error } = useFetch(`/report/${id}`, [
     "report",
     `${id}`,
   ]);
   console.log("data", data);
+
+  const isOwner = userInfo?._id === data?.data?.postedBy?._id;
 
   if (isFetching) {
     return <div>Loading reports...</div>;
@@ -48,26 +54,29 @@ const ItemPage = () => {
             className="w-full h-full object-contain object-center"
           />
         </div>
-        <div className="w-full h-28 rounded-md border whitespace-nowrap">
-          <div className="flex w-max space-x-4 p-4">
-            {data?.data?.photos?.map((photo: string, index: number) => (
-              <div
-                key={index}
-                onClick={() => setSelectedImage(index)}
-                className={`h-20 w-30 rounded-md overflow-hidden border-2 ${
-                  selectedImage === index
-                    ? "border-primary/40"
-                    : "border-transparent"
-                }`}
-              >
-                <img
-                  src={photo}
-                  alt={`Thumbnail ${index + 1}`}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            ))}
-          </div>
+        <div className="w-full h-28 rounded-md border">
+          <ScrollArea className="w-full whitespace-nowrap">
+            <div className="flex w-max space-x-4 p-4">
+              {data?.data?.photos?.map((photo: string, index: number) => (
+                <div
+                  key={index}
+                  onClick={() => setSelectedImage(index)}
+                  className={`h-20 w-30 flex-shrink-0 rounded-md border-2 cursor-pointer ${
+                    selectedImage === index
+                      ? "border-primary/40"
+                      : "border-transparent"
+                  }`}
+                >
+                  <img
+                    src={photo}
+                    alt={`Thumbnail ${index + 1}`}
+                    className="h-full w-full object-cover rounded-md"
+                  />
+                </div>
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -148,7 +157,7 @@ const ItemPage = () => {
           />
         </div>
 
-        <div>
+        {/* <div>
           <h3 className="text-lg font-semibold mb-3">Comments (3)</h3>
           <div className="space-y-4">
             <Comment
@@ -175,7 +184,7 @@ const ItemPage = () => {
             />
             <Button size="sm">Post Comment</Button>
           </div>
-        </div>
+        </div> */}
       </div>
 
       <div className="space-y-5">
@@ -213,14 +222,47 @@ const ItemPage = () => {
             </Badge>
           </div>
 
+          {data?.data?.status === "Claimed" && (
+            <div className="space-y-2 rounded-md border p-4  bg-muted/40">
+              <div className="flex items-center gap-2">
+                <Text type="description">Claimed By:</Text>
+                <Text type="caption">
+                  {data?.data?.claimedBy?.userId?.name}
+                </Text>
+              </div>
+              <div className="flex items-center gap-2">
+                <Text type="description">Claimed At:</Text>
+                <Text type="caption">
+                  {new Date(
+                    data?.data?.claimedBy?.claimedAt
+                  ).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </Text>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2">
-            <Button className="w-full">Claim This Item</Button>
-            <Button className="w-full" variant="outline">
-              Contact Reporter
-            </Button>
-            <Button className="w-full" variant="ghost">
-              Report Issue
-            </Button>
+            {data?.data?.status === "Claimed" ? (
+              <></>
+            ) : (
+              <>
+                {data?.data?.type === "Lost" ? (
+                  <Button className="w-full">I Found This</Button>
+                ) : (
+                  <ClaimItem item={data?.data} disabled={isOwner} />
+                )}
+                <Button className="w-full" variant="outline">
+                  Contact Reporter
+                </Button>
+                <Button className="w-full" variant="ghost">
+                  Report Issue
+                </Button>
+              </>
+            )}
           </div>
         </div>
 

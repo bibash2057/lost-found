@@ -23,22 +23,18 @@ const HomePage = () => {
   const [category, setCategory] = useState("");
   const debouncedSearch = useDebounce({ value: search, delay: 500 });
 
-  const { data, isFetching, error } = useFetch(
+  const { data, isFetching, error, isLoading } = useFetch(
     `/report?search=${debouncedSearch}&category=${category}&status=${status}&type=${type}`,
     ["report-item", debouncedSearch, category, status, type]
   );
   console.log("data", data);
-
-  if (isFetching) {
-    return <div>Loading reports...</div>;
-  }
 
   if (error) {
     return <div>Error loading reports: {error.message}</div>;
   }
 
   return (
-    <div className="py-3 space-y-6 relative">
+    <div className="py-3 space-y-6 relative h-screen">
       <div className="flex items-center justify-center gap-3">
         <div className="flex items-center w-full md:w-1/2 gap-3 border border-gray-200 rounded-full px-3 py-2  bg-custom-gray focus-within:border-gray-300 transition-all">
           <Search className="text-gray-500 size-5" />
@@ -57,10 +53,10 @@ const HomePage = () => {
           <DropdownMenuContent>
             <DropdownMenuLabel>Status</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {["Open", "Verifying", "Claimed"].map((stat) => (
+            {["All", "Open", "Verifying", "Claimed"].map((stat) => (
               <DropdownMenuItem
                 key={stat}
-                onClick={() => setStatus(stat === status ? "" : stat)}
+                onClick={() => setStatus(stat === "All" ? "" : stat)}
                 className={
                   stat === status
                     ? "font-semibold text-primary bg-gray-100"
@@ -117,7 +113,12 @@ const HomePage = () => {
           </span>
         </div>
 
-        {data?.data?.length === 0 ? (
+        {isLoading || isFetching ? (
+          <div className="text-center text-gray-500 text-sm py-20">
+            <p className="text-lg font-semibold">Loading items...</p>
+            <p>Please wait while we fetch the data.</p>
+          </div>
+        ) : data?.data?.length === 0 ? (
           <div className="text-center text-gray-500 text-sm py-10">
             <p className="text-lg font-semibold">No reported items found</p>
             <p>Try adjusting your search or filters.</p>

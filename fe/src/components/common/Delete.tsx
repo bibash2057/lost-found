@@ -54,7 +54,7 @@ const Delete = ({
         <div onClick={() => setIsDialogOpen(true)}>{customDeleteIcon}</div>
       ) : (
         <Trash
-          size={16}
+          size={18}
           className="text-red-500 cursor-pointer"
           onClick={() => setIsDialogOpen(true)}
         />

@@ -96,7 +96,8 @@ exports.getAllItem = asyncHandler(async (req, res) => {
 
   const items = await Item.find(query)
     .populate("postedBy", "name email")
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .select("-verificationQuestions.answer");
 
   res.status(200).json({
     success: true,
@@ -114,7 +115,16 @@ exports.getItemById = asyncHandler(async (req, res) => {
       message: "Valid category ID is required",
     });
   }
-  const item = await Item.findById(id).populate("postedBy claimedBy.userId");
+  const item = await Item.findById(id)
+    .populate({
+      path: "postedBy",
+      select: "name _id",
+    })
+    .populate({
+      path: "claimedBy.userId",
+      select: "name _id",
+    })
+    .select("-verificationQuestions.answer");
 
   if (!item)
     return res.status(404).json({

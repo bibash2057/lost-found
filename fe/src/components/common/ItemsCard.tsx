@@ -13,11 +13,12 @@ import Delete from "./Delete";
 import { Badge } from "../ui/badge";
 import { Link } from "react-router-dom";
 import { Card, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
 
-const ItemsCard = ({ item, isDelete }: any) => {
+const ItemsCard = ({ item, isDelete, isClaim }: any) => {
   return (
-    <Card className="flex md:flex-col flex-row rounded-sm py-0 shadow-none border-gray-50 bg-gray-50/20">
-      <div className="h-52 w-full bg-muted/20">
+    <Card className="relative flex md:flex-col flex-row rounded-sm py-0 shadow-none border-gray-50 bg-gray-50/20">
+      <div className="h-44 w-full bg-muted/20">
         <img
           src={
             item.photos?.[0] ??
@@ -88,13 +89,20 @@ const ItemsCard = ({ item, isDelete }: any) => {
             </Text>
           </div>
           {isDelete && (
-            <Delete
-              title="Are You Sure?"
-              description="Do you really want to delete this item"
-              url={`/report/${item?._id}`}
-              itemKeys={["report-item"]}
-              id={item?._id}
-            />
+            <div className="absolute top-2 right-2 ">
+              <Delete
+                title="Are You Sure?"
+                description="Do you really want to delete this item"
+                url={`/report/${item?._id}`}
+                itemKeys={["report-item"]}
+                id={item?._id}
+              />
+            </div>
+          )}
+          {isClaim && (
+            <Link to={`/claimReport/${item?._id}`}>
+              <Button>Review Claims</Button>
+            </Link>
           )}
         </div>
       </CardHeader>

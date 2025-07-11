@@ -13,7 +13,7 @@ const ClaimSchema = new mongoose.Schema(
       required: true,
     },
     answers: [{ question: String, answer: String }],
-    proofPhoto: { type: String },
+    proofPhoto: [String],
     status: {
       type: String,
       enum: ["Pending", "Approved", "Rejected"],
