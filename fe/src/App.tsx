@@ -1,15 +1,16 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./App.css";
-import AppLayout from "./layout/AppLayout";
-import PageNotFound from "./page/PageNotFound";
+import "leaflet/dist/leaflet.css";
 import HomePage from "./page/HomePage";
-import ReportItem from "./page/ReportItem";
-import ItemPage from "./page/ItemPage";
-import AuthLayout from "./layout/AuthLayout";
-import LoginPage from "./page/LoginPage";
-import RegisterPage from "./page/RegisterPage";
 import MyReport from "./page/MyReport";
+import ItemPage from "./page/ItemPage";
+import LoginPage from "./page/LoginPage";
+import AppLayout from "./layout/AppLayout";
+import ReportItem from "./page/ReportItem";
 import ClaimReport from "./page/ClaimReport";
+import AuthLayout from "./layout/AuthLayout";
+import RegisterPage from "./page/RegisterPage";
+import PageNotFound from "./page/PageNotFound";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 const router = createBrowserRouter([
   {

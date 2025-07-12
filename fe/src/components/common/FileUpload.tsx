@@ -148,6 +148,31 @@ const FileUpload = ({
                 ))}
               </div>
             )}
+            {Array.isArray(field.value) && (
+              <div className="mt-2 w-full px-4 max-h-32 overflow-y-auto">
+                {field.value.map((file: File, index: number) => (
+                  <div
+                    key={`${file.name}-${index}`}
+                    className="flex items-center justify-between py-1"
+                  >
+                    <Text type="caption" className="truncate max-w-xs">
+                      {file.name}
+                    </Text>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newFiles = [...field.value];
+                        newFiles.splice(index, 1);
+                        field.onChange(newFiles);
+                      }}
+                      className="text-red-500 hover:text-red-700 text-xs"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <FormMessage />

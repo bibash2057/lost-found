@@ -18,6 +18,9 @@ import ImportantTips from "@/components/common/ImportantTips";
 import ReportOption from "@/components/ReportItem/ReportOption";
 import { Form, FormItem, FormLabel } from "@/components/ui/form";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
+import type { LatLng } from "leaflet";
+import { Label } from "@/components/ui/label";
+import MapSelect from "@/components/common/MapSelect";
 
 interface VerificationQuestion {
   question: string;
@@ -60,6 +63,7 @@ const ReportItem = () => {
       des: "",
       category: "",
       location: "",
+      coordinates: undefined,
       photos: [],
       verificationQuestions: [{ question: "", answer: "" }],
     },
@@ -70,6 +74,13 @@ const ReportItem = () => {
     control,
     name: "verificationQuestions",
   });
+
+  const handleMapClick = (latlng: LatLng) => {
+    form.setValue("coordinates", {
+      lat: latlng.lat,
+      lng: latlng.lng,
+    });
+  };
 
   const { mutate, isPending } = usePost<any, FormData>(
     "/report",
@@ -100,8 +111,10 @@ const ReportItem = () => {
     formData.append("category", data.category);
     formData.append("location", data.location);
 
-    // formData.append("coordinates[lat]", data.coordinates.lat.toString());
-    // formData.append("coordinates[lng]", data.coordinates.lng.toString());
+    if (data.coordinates) {
+      formData.append("coordinates[lat]", data.coordinates.lat.toString());
+      formData.append("coordinates[lng]", data.coordinates.lng.toString());
+    }
 
     data.verificationQuestions.forEach((q, idx) => {
       formData.append(`verificationQuestions[${idx}][question]`, q.question);
@@ -220,6 +233,17 @@ const ReportItem = () => {
               placeholder="e.g. Tribhuvan International Airport"
               note="Be as specific as possible with the location"
             />
+          </div>
+          <div className="mt-4">
+            <Label className="py-3">Select Location on Map *</Label>
+            <MapSelect onLocationSelect={handleMapClick} />
+            {form.watch("coordinates") && (
+              <Text className="text-xs text-gray-500 mt-2">
+                Selected coordinates:{" "}
+                {form.watch("coordinates")?.lat?.toFixed(4)},
+                {form.watch("coordinates")?.lng?.toFixed(4)}
+              </Text>
+            )}
           </div>
 
           <Text type="subTitle" className="text-lg font-medium mb-4">

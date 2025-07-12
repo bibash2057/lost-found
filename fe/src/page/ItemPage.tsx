@@ -19,6 +19,8 @@ import { useState, type ReactNode } from "react";
 import ClaimItem from "@/components/ClaimItem";
 import { useAuth } from "@/store/useAuth";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import type { AxiosError } from "axios";
+import MapView from "./MapView";
 
 const ItemPage = () => {
   const { id } = useParams();
@@ -38,126 +40,149 @@ const ItemPage = () => {
   }
 
   if (error) {
-    return <div>Error loading reports: {error.message}</div>;
+    const axiosError = error as AxiosError<{ message: string }>;
+    return (
+      <div>
+        Error loading reports:{" "}
+        {axiosError.response?.data?.message || error.message}
+      </div>
+    );
   }
 
   return (
     <div className="max-w-6xl mx-auto py-10 px-4 md:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div className="md:col-span-2 space-y-6">
-        <div className="aspect-video w-full bg-gray-100 overflow-hidden rounded-lg">
-          <img
-            src={
-              data?.data.photos?.[selectedImage] ||
-              "https://commons.wikimedia.org/wiki/File:No-Image-Placeholder.svg"
-            }
-            alt={data?.data.photos?.[selectedImage]}
-            className="w-full h-full object-contain object-center"
-          />
-        </div>
-        <div className="w-full h-28 rounded-md border">
-          <ScrollArea className="w-full whitespace-nowrap">
-            <div className="flex w-max space-x-4 p-4">
-              {data?.data?.photos?.map((photo: string, index: number) => (
-                <div
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`h-20 w-30 flex-shrink-0 rounded-md border-2 cursor-pointer ${
-                    selectedImage === index
-                      ? "border-primary/40"
-                      : "border-transparent"
-                  }`}
-                >
-                  <img
-                    src={photo}
-                    alt={`Thumbnail ${index + 1}`}
-                    className="h-full w-full object-cover rounded-md"
-                  />
-                </div>
-              ))}
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Text className="text-2xl font-semibold">{data?.data?.title}</Text>
-            <div className="text-sm text-gray-500 flex items-center gap-1">
-              <Clock className="w-4 h-4" />
-              {new Date(data?.data?.createdAt).toDateString()}
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Badge
-              variant={data?.data.type === "Lost" ? "red" : "purple"}
-              className={`text-[11px] px-2 py-0.5 rounded-2xl`}
-            >
-              {data?.data.type === "Lost" && (
-                <TriangleAlert className="h-3 w-3" />
-              )}
-              {data?.data.type === "Found" && (
-                <SearchCheck className="h-3 w-3" />
-              )}
-
-              {data?.data.type}
-            </Badge>
-
-            <Badge
-              variant={
-                data?.data?.status === "Open"
-                  ? "blue"
-                  : data?.data?.status === "Claimed"
-                  ? "green"
-                  : data?.data?.status === "Verifying"
-                  ? "yellow"
-                  : "blue"
+      <div className="md:col-span-2 space-y-6 order-2 md:order-1">
+        <>
+          {" "}
+          <div className="aspect-video w-full bg-gray-100 overflow-hidden rounded-lg">
+            <img
+              src={
+                data?.data.photos?.[selectedImage] ||
+                "https://commons.wikimedia.org/wiki/File:No-Image-Placeholder.svg"
               }
-              className={`text-[11px] px-2 py-0.5 rounded-2xl ${""}`}
-            >
-              {data?.data?.status === "Open" && <Circle className="h-3 w-3" />}
-              {data?.data?.status === "Claimed" && <Hand className="h-3 w-3" />}
-              {data?.data?.status === "Verifying" && (
-                <CircleFadingArrowUp className="h-3 w-3" />
-              )}
-              {data?.data?.status}
-            </Badge>
+              alt={data?.data.photos?.[selectedImage]}
+              className="w-full h-full object-contain object-center"
+            />
           </div>
-        </div>
+          <div className="w-full h-28 rounded-md border">
+            <ScrollArea className="w-full whitespace-nowrap">
+              <div className="flex w-max space-x-4 p-4">
+                {data?.data?.photos?.map((photo: string, index: number) => (
+                  <div
+                    key={index}
+                    onClick={() => setSelectedImage(index)}
+                    className={`h-20 w-30 flex-shrink-0 rounded-md border-2 cursor-pointer ${
+                      selectedImage === index
+                        ? "border-primary/40"
+                        : "border-transparent"
+                    }`}
+                  >
+                    <img
+                      src={photo}
+                      alt={`Thumbnail ${index + 1}`}
+                      className="h-full w-full object-cover rounded-md"
+                    />
+                  </div>
+                ))}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Text className="text-2xl font-semibold">
+                {data?.data?.title}
+              </Text>
+              <div className="text-sm text-gray-500 flex items-center gap-1">
+                <Clock className="w-4 h-4" />
+                {new Date(data?.data?.createdAt).toDateString()}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Badge
+                variant={data?.data.type === "Lost" ? "red" : "purple"}
+                className={`text-[11px] px-2 py-0.5 rounded-2xl`}
+              >
+                {data?.data.type === "Lost" && (
+                  <TriangleAlert className="h-3 w-3" />
+                )}
+                {data?.data.type === "Found" && (
+                  <SearchCheck className="h-3 w-3" />
+                )}
 
-        <div className="bg-gray-50 p-5 rounded-md">
-          <h3 className="text-lg font-medium text-[#2D3E50] mb-2">
-            Description
-          </h3>
-          <p className="text-gray-700 text-sm">{data?.data?.des}</p>
-        </div>
+                {data?.data.type}
+              </Badge>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <InfoCard
-            title="Category"
-            value={data?.data?.category}
-            icon={<Gem className="h-4 w-4" />}
-          />
-          <InfoCard
-            title="Location"
-            value={data?.data?.location}
-            icon={<MapPin className="h-4 w-4" />}
-          />
-          <InfoCard
-            title="Date"
-            value={new Date(data?.data?.createdAt).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "2-digit",
-            })}
-            icon={<Calendar className="h-4 w-4" />}
-          />
-          <InfoCard
-            title="Status"
-            value={data?.data?.type}
-            icon={<TriangleAlert className="h-4 w-4" />}
-          />
-        </div>
-
-        {/* <div>
+              <Badge
+                variant={
+                  data?.data?.status === "Open"
+                    ? "blue"
+                    : data?.data?.status === "Claimed"
+                    ? "green"
+                    : data?.data?.status === "Verifying"
+                    ? "yellow"
+                    : "blue"
+                }
+                className={`text-[11px] px-2 py-0.5 rounded-2xl ${""}`}
+              >
+                {data?.data?.status === "Open" && (
+                  <Circle className="h-3 w-3" />
+                )}
+                {data?.data?.status === "Claimed" && (
+                  <Hand className="h-3 w-3" />
+                )}
+                {data?.data?.status === "Verifying" && (
+                  <CircleFadingArrowUp className="h-3 w-3" />
+                )}
+                {data?.data?.status}
+              </Badge>
+            </div>
+          </div>
+          <div className="bg-gray-50 p-5 rounded-md">
+            <h3 className="text-lg font-medium text-[#2D3E50] mb-2">
+              Description
+            </h3>
+            <p className="text-gray-700 text-sm">{data?.data?.des}</p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <InfoCard
+              title="Category"
+              value={data?.data?.category}
+              icon={<Gem className="h-4 w-4" />}
+            />
+            <InfoCard
+              title="Location"
+              value={data?.data?.location}
+              icon={<MapPin className="h-4 w-4" />}
+            />
+            <InfoCard
+              title="Date"
+              value={new Date(data?.data?.createdAt).toLocaleDateString(
+                "en-US",
+                {
+                  month: "short",
+                  day: "numeric",
+                  year: "2-digit",
+                }
+              )}
+              icon={<Calendar className="h-4 w-4" />}
+            />
+            <InfoCard
+              title="Status"
+              value={data?.data?.type}
+              icon={<TriangleAlert className="h-4 w-4" />}
+            />
+          </div>
+          {data?.data?.coordinates && (
+            <>
+              <Text type="caption">
+                The map below shows the reported location where the item was
+                found.
+              </Text>
+              <MapView position={data.data.coordinates} />
+            </>
+          )}
+          {/* <div>
           <h3 className="text-lg font-semibold mb-3">Comments (3)</h3>
           <div className="space-y-4">
             <Comment
@@ -185,10 +210,11 @@ const ItemPage = () => {
             <Button size="sm">Post Comment</Button>
           </div>
         </div> */}
+        </>
       </div>
 
-      <div className="space-y-5">
-        <div className="border p-4 rounded-md">
+      <div className="space-y-5 order-1 md:order-2">
+        <div className="border p-4 rounded-md order-1">
           <div className="flex items-center gap-3 mb-4">
             <User className="w-5 h-5 text-gray-600" />
             <div>
@@ -251,7 +277,7 @@ const ItemPage = () => {
             ) : (
               <>
                 {data?.data?.type === "Lost" ? (
-                  <Button className="w-full">I Found This</Button>
+                  <Button className="w-full">Report Found</Button>
                 ) : (
                   <ClaimItem item={data?.data} disabled={isOwner} />
                 )}
@@ -266,7 +292,7 @@ const ItemPage = () => {
           </div>
         </div>
 
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-gray-600 order-3 md:order-2">
           <Text className="font-semibold mb-1">Similar Items</Text>
           <p className="text-xs text-gray-400">Coming soon...</p>
         </div>

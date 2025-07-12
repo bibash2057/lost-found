@@ -99,10 +99,20 @@ exports.getAllItem = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .select("-verificationQuestions.answer");
 
+  const [lostCount, foundCount] = await Promise.all([
+    Item.countDocuments({ ...query, type: "Lost" }),
+    Item.countDocuments({ ...query, type: "Found" }),
+  ]);
+
   res.status(200).json({
     success: true,
     message: "Reported Items fetched successfully!",
     data: items,
+    counts: {
+      lost: lostCount,
+      found: foundCount,
+      total: items.length,
+    },
   });
 });
 

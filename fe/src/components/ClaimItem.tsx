@@ -84,7 +84,7 @@ const ClaimItem = ({ item, disabled }: any) => {
   return (
     <Dialog>
       <DialogTrigger asChild disabled={disabled}>
-        <Button className="w-full">Claim This Item</Button>
+        <Button className="w-full">Claim Item</Button>
       </DialogTrigger>
 
       <DialogContent className="w-full max-w-2xl md:max-w-3xl ">

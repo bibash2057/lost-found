@@ -93,8 +93,8 @@ const HomePage = () => {
                 }`}
               >
                 <span className="">Lost</span>
-                <span className="flex items-center justify-center size-5 rounded-sm bg-primary/75 text-xs text-white">
-                  3
+                <span className="flex min-w-2.5 px-1.5 py-0.5 items-center justify-center rounded-sm bg-primary/75 text-xs text-white">
+                  {data?.counts?.lost}
                 </span>
               </Button>
               <Button
@@ -105,8 +105,8 @@ const HomePage = () => {
                 }`}
               >
                 <span className="">Found</span>
-                <span className="flex items-center justify-center size-5 rounded-sm bg-primary/75 text-xs text-white">
-                  0
+                <span className="flex min-w-2.5 px-1.5 py-0.5 items-center justify-center rounded-sm bg-primary/75 text-xs text-white">
+                  {data?.counts?.found}
                 </span>
               </Button>
             </div>
@@ -115,13 +115,15 @@ const HomePage = () => {
 
         {isLoading || isFetching ? (
           <div className="text-center text-gray-500 text-sm py-20">
-            <p className="text-lg font-semibold">Loading items...</p>
-            <p>Please wait while we fetch the data.</p>
+            <Text className="text-lg font-semibold">Loading items...</Text>
+            <Text>Please wait while we fetch the data.</Text>
           </div>
         ) : data?.data?.length === 0 ? (
           <div className="text-center text-gray-500 text-sm py-10">
-            <p className="text-lg font-semibold">No reported items found</p>
-            <p>Try adjusting your search or filters.</p>
+            <Text className="text-lg font-semibold">
+              No reported items found
+            </Text>
+            <Text>Try adjusting your search or filters.</Text>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-4 gap-4">

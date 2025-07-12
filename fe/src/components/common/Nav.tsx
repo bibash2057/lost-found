@@ -31,11 +31,8 @@ const Nav = () => {
       {isLoggedIn ? (
         <div className="flex items-center gap-4">
           <Link to={"/reportItem"}>
-            <Button>Report Item</Button>
+            <Button variant={"outline"}>Report Item</Button>
           </Link>
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell />
-          </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger>
