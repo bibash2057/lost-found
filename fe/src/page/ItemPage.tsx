@@ -319,22 +319,22 @@ const InfoCard = ({
   </div>
 );
 
-const Comment = ({
-  name,
-  time,
-  text,
-}: {
-  name: string;
-  time: string;
-  text: string;
-}) => (
-  <div className="border rounded-md p-3 bg-white shadow-sm">
-    <div className="flex items-center justify-between mb-1">
-      <p className="font-medium text-sm">{name}</p>
-      <p className="text-xs text-gray-400">{time}</p>
-    </div>
-    <p className="text-sm text-gray-700">{text}</p>
-  </div>
-);
+// const Comment = ({
+//   name,
+//   time,
+//   text,
+// }: {
+//   name: string;
+//   time: string;
+//   text: string;
+// }) => (
+//   <div className="border rounded-md p-3 bg-white shadow-sm">
+//     <div className="flex items-center justify-between mb-1">
+//       <p className="font-medium text-sm">{name}</p>
+//       <p className="text-xs text-gray-400">{time}</p>
+//     </div>
+//     <p className="text-sm text-gray-700">{text}</p>
+//   </div>
+// );
 
 export default ItemPage;

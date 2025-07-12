@@ -222,7 +222,7 @@ const ClaimReport = () => {
                       onClick={() => {
                         setClaimId(claim?._id), handleStatusUpdate("Rejected");
                       }}
-                      // disabled={isPending}
+                      disabled={isPending}
                     >
                       <X className="h-4 w-4 mr-2" />
                       Reject
@@ -232,7 +232,7 @@ const ClaimReport = () => {
                       onClick={() => {
                         setClaimId(claim?._id), handleStatusUpdate("Approved");
                       }}
-                      // disabled={isPending}
+                      disabled={isPending}
                     >
                       <Check className="h-4 w-4 mr-2" />
                       Approve

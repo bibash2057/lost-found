@@ -6,8 +6,9 @@ const express = require("express");
 const cloudinary = require("cloudinary");
 
 const { notFound, errorHandler } = require("./src/middleware/error-handler");
+const setting = require("./src/config/setting");
 
-const PORT = 8000;
+const PORT = setting.PORT || 8000;
 const app = express();
 
 db.connectDB();

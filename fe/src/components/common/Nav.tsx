@@ -1,13 +1,10 @@
 import {
   DropdownMenu,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuContent,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
 import { toast } from "sonner";
-import { Bell } from "lucide-react";
 import { Button } from "../ui/button";
 import { useAuth } from "@/store/useAuth";
 import { Link, useNavigate } from "react-router-dom";

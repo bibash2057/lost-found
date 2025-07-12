@@ -1,6 +1,5 @@
 import Nav from "@/components/common/Nav";
-import { useAuth } from "@/store/useAuth";
-import { Navigate, Outlet } from "react-router-dom";
+import {  Outlet } from "react-router-dom";
 
 const AppLayout = () => {
   return (
