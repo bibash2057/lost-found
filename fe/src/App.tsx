@@ -1,5 +1,4 @@
 import "./App.css";
-import "leaflet/dist/leaflet.css";
 import HomePage from "./page/HomePage";
 import MyReport from "./page/MyReport";
 import ItemPage from "./page/ItemPage";

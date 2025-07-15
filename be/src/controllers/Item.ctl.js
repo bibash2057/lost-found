@@ -79,6 +79,93 @@ exports.reportItem = asyncHandler(async (req, res) => {
   });
 });
 
+exports.updateReportItem = asyncHandler(async (req, res) => {
+  console.log(req.body);
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  const {
+    type,
+    title,
+    des,
+    category,
+    location,
+    coordinates,
+    verificationQuestions,
+  } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid item ID",
+    });
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid user ID",
+    });
+  }
+
+  if (!type || !title || !category || !location) {
+    return res
+      .status(400)
+      .json({ message: "Please provide all required fields" });
+  }
+
+  if (type === "Found" && verificationQuestions?.length > 0) {
+    const invalid = verificationQuestions.some((q) => !q.question || !q.answer);
+    if (invalid) {
+      return res.status(400).json({
+        success: false,
+        message: "Verification questions must have both question and answer",
+      });
+    }
+  }
+
+  const existingItem = await Item.findById(id);
+  if (!existingItem) {
+    return res.status(404).json({ success: false, message: "Item not found" });
+  }
+
+  if (existingItem.postedBy.toString() !== userId) {
+    return res.status(403).json({
+      success: false,
+      message: "You are not authorized to update this item",
+    });
+  }
+
+  if (req.files && req.files.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Image updates are not allowed.",
+    });
+  }
+
+  const updatedItem = await Item.findByIdAndUpdate(
+    id,
+    {
+      type,
+      title,
+      des,
+      category,
+      location,
+      coordinates: coordinates || null,
+      verificationQuestions: verificationQuestions || [],
+    },
+    {
+      new: true,
+    }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Item updated successfully",
+    data: updatedItem,
+  });
+});
+
 exports.getAllItem = asyncHandler(async (req, res) => {
   const { type, category, status, search } = req.query;
 
@@ -154,7 +241,7 @@ exports.getMyReportedItems = asyncHandler(async (req, res) => {
 
   const reportedItems = await Item.find({ postedBy: id })
     .sort({ createdAt: -1 })
-    .select("-verificationQuestions -__v");
+    .select("-__v");
 
   res.status(200).json({
     success: true,

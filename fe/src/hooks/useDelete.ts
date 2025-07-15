@@ -17,11 +17,10 @@ const useDelete = <TData = any, TVariables = any>(
     mutationFn: () => {
       return http.delete(url);
     },
+    ...options,
     onSuccess: (res, variables, context) => {
-      console.log("Success response:", res);
-      console.log("Delte key", key);
-      queryClient.invalidateQueries({ queryKey: key });
       queryClient.refetchQueries({ queryKey: key });
+      queryClient.invalidateQueries({ queryKey: key });
       toast("success");
       if (options.onSuccess) {
         options.onSuccess(res, variables, context);
@@ -34,7 +33,6 @@ const useDelete = <TData = any, TVariables = any>(
         options.onError(err, variables, context);
       }
     },
-    ...options,
   });
 };
 

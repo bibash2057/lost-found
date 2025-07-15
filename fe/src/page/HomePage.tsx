@@ -25,9 +25,8 @@ const HomePage = () => {
 
   const { data, isFetching, error, isLoading } = useFetch(
     `/report?search=${debouncedSearch}&category=${category}&status=${status}&type=${type}`,
-    ["report-item", debouncedSearch, category, status, type]
+    ["reported-item", debouncedSearch, category, status, type]
   );
-  console.log("data", data);
 
   if (error) {
     return <div>Error loading reports: {error.message}</div>;

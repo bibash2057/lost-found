@@ -6,7 +6,6 @@ import ItemsCard from "@/components/common/ItemsCard";
 
 const MyReport = () => {
   const { data } = useFetch("/reportedItem", ["reported-item"]);
-  console.log("data", data?.data);
 
   return (
     <div>

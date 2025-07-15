@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import usePost from "@/hooks/usePost";
 import Text from "@/components/common/Text";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import FormInput from "@/components/common/FormInput";
 import { Separator } from "@/components/ui/separator";
@@ -21,6 +21,7 @@ import { Controller, useFieldArray, useForm } from "react-hook-form";
 import type { LatLng } from "leaflet";
 import { Label } from "@/components/ui/label";
 import MapSelect from "@/components/common/MapSelect";
+import usePatch from "@/hooks/usePatch";
 
 interface VerificationQuestion {
   question: string;
@@ -55,17 +56,21 @@ const CATEGORY_OPTIONS = [
 ];
 
 const ReportItem = () => {
+  const { state } = useLocation();
+
   const navigate = useNavigate();
   const form = useForm<ReportItemPayload>({
     defaultValues: {
-      type: "Lost",
-      title: "",
-      des: "",
-      category: "",
-      location: "",
-      coordinates: undefined,
+      type: state?.item?.type ?? "Lost",
+      title: state?.item?.title ?? "",
+      des: state?.item?.des ?? "",
+      category: state?.item?.category ?? "",
+      location: state?.item?.location ?? "",
+      coordinates: state?.item?.coordinates ?? undefined,
       photos: [],
-      verificationQuestions: [{ question: "", answer: "" }],
+      verificationQuestions: state?.item?.verificationQuestions ?? [
+        { question: "", answer: "" },
+      ],
     },
   });
 
@@ -84,11 +89,9 @@ const ReportItem = () => {
 
   const { mutate, isPending } = usePost<any, FormData>(
     "/report",
-    ["report-item"],
+    ["reported-item"],
     {
       onSuccess: (res) => {
-        console.log("res", res);
-
         toast.success(res.data.message);
         reset();
         navigate("/");
@@ -101,6 +104,27 @@ const ReportItem = () => {
       },
     },
     { headers: { "Content-Type": "multipart/form-data" } }
+  );
+
+  const { mutate: editMutate } = usePatch<any, ReportItemPayload>(
+    `/report/${state?.item?._id}`,
+    ["reported-item"],
+    {
+      onSuccess: (res) => {
+        console.log("res", res);
+
+        toast.success(res.data.message);
+        reset();
+        navigate("/myReport");
+      },
+      onError: (err) => {
+        console.log("err", err);
+        toast.error("Item Add", {
+          description: err.response?.data?.message || "Please try again",
+        });
+      },
+    }
+    // { headers: { "Content-Type": "multipart/form-data" } }
   );
 
   const onSubmit = async (data: ReportItemPayload) => {
@@ -128,7 +152,9 @@ const ReportItem = () => {
     }
 
     console.log("formData", formData);
-    mutate(formData);
+    if (state?.item?._id) {
+      editMutate(data);
+    } else mutate(formData);
   };
 
   return (

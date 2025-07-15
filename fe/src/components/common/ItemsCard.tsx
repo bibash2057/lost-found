@@ -7,17 +7,20 @@ import {
   SearchCheck,
   TriangleAlert,
   CircleFadingArrowUp,
+  Pencil,
 } from "lucide-react";
 import Text from "./Text";
 import Delete from "./Delete";
 import { Badge } from "../ui/badge";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 
 const ItemsCard = ({ item, isDelete, isClaim }: any) => {
+  const navigate = useNavigate();
+
   return (
-    <Card className="relative flex md:flex-col flex-row rounded-sm py-0 shadow-none border-gray-50 bg-gray-50/20">
+    <Card className=" flex md:flex-col flex-row rounded-sm py-0 shadow-none border-gray-50 bg-gray-50/20">
       <div className="h-44 w-full bg-muted/20">
         <img
           src={
@@ -89,13 +92,18 @@ const ItemsCard = ({ item, isDelete, isClaim }: any) => {
             </Text>
           </div>
           {isDelete && (
-            <div className="absolute top-2 right-2 ">
+            <div className="">
               <Delete
                 title="Are You Sure?"
                 description="Do you really want to delete this item"
                 url={`/report/${item?._id}`}
-                itemKeys={["report-item"]}
+                itemKeys={["reported-item"]}
                 id={item?._id}
+              />
+              <Pencil
+                className="text-blue-600"
+                size={18}
+                onClick={() => navigate("/reportItem", { state: { item } })}
               />
             </div>
           )}

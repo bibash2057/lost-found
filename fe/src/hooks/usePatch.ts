@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 const usePatch = <TData, TVariables = any>(
   url: string,
-  key: string[],
+  key: any[],
   options: UseMutationOptions<AxiosResponse<TData>, any, TVariables> = {},
   config: AxiosRequestConfig = {}
 ) => {
@@ -17,24 +17,19 @@ const usePatch = <TData, TVariables = any>(
 
   const mutation = useMutation<AxiosResponse<TData>, any, TVariables>({
     mutationFn: (data) => http.patch<TData>(url, data, config),
+    ...options,
     onSuccess: (res, variables, context) => {
-      console.log("Patch success response:", res);
       queryClient.invalidateQueries({ queryKey: key });
-      toast("success");
+      toast.success("Updated successfully");
 
-      if (options.onSuccess) {
-        options.onSuccess(res, variables, context);
-      }
+      options.onSuccess?.(res, variables, context);
     },
     onError: (error, variables, context) => {
       console.error("Patch error:", error);
-      toast("error");
+      toast.error("Failed to update");
 
-      if (options.onError) {
-        options.onError(error, variables, context);
-      }
+      options.onError?.(error, variables, context);
     },
-    ...options,
   });
 
   return mutation;

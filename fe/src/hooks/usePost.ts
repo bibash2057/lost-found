@@ -17,24 +17,19 @@ const usePost = <TData, TVariables = any>(
 
   const mutation = useMutation<AxiosResponse<TData>, any, TVariables>({
     mutationFn: (data) => http.post<TData>(url, data, config),
+    ...options,
     onSuccess: (res, variables, context) => {
-      console.log("res", res);
-      console.log("Post key", key);
       queryClient.invalidateQueries({ queryKey: key });
       queryClient.refetchQueries({ queryKey: key });
+
       toast("success");
-      if (options.onSuccess) {
-        options.onSuccess(res, variables, context);
-      }
+      options.onSuccess?.(res, variables, context);
     },
     onError: (err, variables, context) => {
       console.error(err);
       toast("error");
-      if (options.onError) {
-        options.onError(err, variables, context);
-      }
+      options.onError?.(err, variables, context);
     },
-    ...options,
   });
 
   return mutation;
