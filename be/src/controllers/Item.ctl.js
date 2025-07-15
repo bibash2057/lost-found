@@ -2,6 +2,7 @@ const Item = require("../models/Item.models");
 const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
 const uploadToCloudinary = require("../utils/cloudinaryUpload");
+const redisClient = require("../utils/redis");
 
 exports.reportItem = asyncHandler(async (req, res) => {
   const { id } = req.user;
@@ -181,6 +182,15 @@ exports.getAllItem = asyncHandler(async (req, res) => {
     ];
   }
 
+  const cacheKey = `items:${JSON.stringify(query)}`;
+
+  const cachedData = await redisClient.get(cacheKey);
+
+  if (cachedData) {
+    const parsed = JSON.parse(cachedData);
+    return res.status(200).json(parsed);
+  }
+
   const items = await Item.find(query)
     .populate("postedBy", "name email")
     .sort({ createdAt: -1 })
@@ -191,7 +201,7 @@ exports.getAllItem = asyncHandler(async (req, res) => {
     Item.countDocuments({ ...query, type: "Found" }),
   ]);
 
-  res.status(200).json({
+  const response = {
     success: true,
     message: "Reported Items fetched successfully!",
     data: items,
@@ -200,7 +210,11 @@ exports.getAllItem = asyncHandler(async (req, res) => {
       found: foundCount,
       total: items.length,
     },
-  });
+  };
+
+  await redisClient.setEx(cacheKey, 3000, JSON.stringify(response));
+
+  res.status(200).json(response);
 });
 
 exports.getItemById = asyncHandler(async (req, res) => {
@@ -212,6 +226,16 @@ exports.getItemById = asyncHandler(async (req, res) => {
       message: "Valid category ID is required",
     });
   }
+
+  const cacheKey = `item:${id}`;
+
+  const cachedItem = await redisClient.get(cacheKey);
+
+  if (cachedItem) {
+    // console.log("this is from redis");
+    return res.status(200).json(JSON.parse(cachedItem));
+  }
+
   const item = await Item.findById(id)
     .populate({
       path: "postedBy",
@@ -229,25 +253,41 @@ exports.getItemById = asyncHandler(async (req, res) => {
       message: "Item not found",
     });
 
-  res.status(200).json({
+  const response = {
     success: true,
     message: "Reported Items fetched successfully!",
     data: item,
-  });
+  };
+
+  await redisClient.setEx(cacheKey, 3000, JSON.stringify(response));
+
+  res.status(200).json(response);
 });
 
 exports.getMyReportedItems = asyncHandler(async (req, res) => {
   const { id } = req.user;
 
+  const cacheKey = `reportedItem:${id}`;
+
+  const cached = await redisClient.get(cacheKey);
+
+  if (cached) {
+    console.log("direct from redis");
+    return res.status(200).json(JSON.parse(cached));
+  }
+
   const reportedItems = await Item.find({ postedBy: id })
     .sort({ createdAt: -1 })
     .select("-__v");
 
-  res.status(200).json({
+  const response = {
     success: true,
     message: "Reported Items fetched successfully!",
     data: reportedItems,
-  });
+  };
+  await redisClient.setEx(cacheKey, 3600, JSON.stringify(response));
+
+  res.status(200).json(response);
 });
 
 exports.delteItem = asyncHandler(async (req, res) => {
