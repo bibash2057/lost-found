@@ -3,9 +3,6 @@ const { REDIS } = require("../config/setting");
 
 const redisClient = redis.createClient({
   url: REDIS,
-  socket: {
-    tls: true,
-  },
 });
 
 redisClient.on("error", (err) => console.error("Redis Client Error", err));
