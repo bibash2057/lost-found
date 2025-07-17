@@ -34,7 +34,7 @@ app.use(errorHandler);
 //   else console.log("Cloudinary connection successful:", result);
 // });
 
-app.get("/", (req, res) => {
+app.get("/health", (req, res) => {
   res.send("Server is healthy");
 });
 
