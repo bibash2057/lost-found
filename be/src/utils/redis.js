@@ -2,7 +2,7 @@ const redis = require("redis");
 const { REDIS } = require("../config/setting");
 
 const redisClient = redis.createClient({
-  // url: REDIS,
+  url: REDIS,
 });
 
 redisClient.on("error", (err) => console.error("Redis Client Error", err));
