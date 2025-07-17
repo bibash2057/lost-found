@@ -13,7 +13,12 @@ const app = express();
 
 db.connectDB();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: ["https://lost-found-rouge.vercel.app/", "http://localhost:5173/"],
+    methods: ["GET", "POST", "Delete", "PUT", "PATCH"],
+  })
+);
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
