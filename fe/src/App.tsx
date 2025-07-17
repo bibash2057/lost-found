@@ -9,7 +9,14 @@ import ClaimReport from "./page/ClaimReport";
 import AuthLayout from "./layout/AuthLayout";
 import RegisterPage from "./page/RegisterPage";
 import PageNotFound from "./page/PageNotFound";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  useNavigate,
+} from "react-router-dom";
+import React from "react";
+import { toast } from "sonner";
+import { useAuth } from "./store/useAuth";
 
 const router = createBrowserRouter([
   {
@@ -36,6 +43,32 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  const navigate = useNavigate();
+  const { logOut } = useAuth();
+  const handleUnauthorized = React.useCallback(() => {
+    toast.error("Session expired , please login again");
+    logOut();
+    navigate("/login");
+  }, [logOut, toast]);
+
+  const handleForbidden = React.useCallback(
+    (e: any) => {
+      const { error } = e.detail;
+      toast.error("error", error?.message);
+    },
+    [toast]
+  );
+
+  React.useEffect(() => {
+    window.addEventListener("forbidden", handleForbidden);
+    return () => window.removeEventListener("forbidden", handleForbidden);
+  }, [handleForbidden]);
+
+  React.useEffect(() => {
+    window.addEventListener("unauthorized", handleUnauthorized);
+    return () => window.removeEventListener("unauthorized", handleUnauthorized);
+  }, [handleUnauthorized]);
+
   return (
     <>
       <RouterProvider router={router} />

@@ -15,8 +15,9 @@ db.connectDB();
 
 app.use(
   cors({
-    origin: ["https://lost-found-rouge.vercel.app/", "http://localhost:5173/"],
-    methods: ["GET", "POST", "Delete", "PUT", "PATCH"],
+    origin: ["https://lost-found-rouge.vercel.app", "http://localhost:5173"],
+    methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
+    credentials: true,
   })
 );
 app.use(helmet());
