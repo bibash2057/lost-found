@@ -12,7 +12,6 @@ import PageNotFound from "./page/PageNotFound";
 import {
   createBrowserRouter,
   RouterProvider,
-  useNavigate,
 } from "react-router-dom";
 import React from "react";
 import { toast } from "sonner";
