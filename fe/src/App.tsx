@@ -43,12 +43,10 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  const navigate = useNavigate();
   const { logOut } = useAuth();
   const handleUnauthorized = React.useCallback(() => {
     toast.error("Session expired , please login again");
     logOut();
-    navigate("/login");
   }, [logOut, toast]);
 
   const handleForbidden = React.useCallback(
