@@ -8,7 +8,7 @@ const useFetch = <T = any>(
   config: AxiosRequestConfig = {}
 ): UseQueryResult<T, Error> => {
   const normalizedQueryKey = Array.isArray(key) ? key : [key];
-  const Query = useQuery({
+ return useQuery({
     queryFn: async () => {
       const res = await http.get<T>(url, config);
       return res.data;
@@ -17,7 +17,7 @@ const useFetch = <T = any>(
     enabled: !!url,
     staleTime: 5 * 60 * 1000,
   });
-  return Query;
+
 };
 
 export default useFetch;

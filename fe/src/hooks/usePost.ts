@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 const usePost = <TData, TVariables = any>(
   url: string,
-  key: [string],
+  key: [any],
   options: UseMutationOptions<AxiosResponse<TData>, any, TVariables> = {},
   config: AxiosRequestConfig = {}
 ) => {
@@ -20,7 +20,6 @@ const usePost = <TData, TVariables = any>(
     ...options,
     onSuccess: (res, variables, context) => {
       queryClient.invalidateQueries({ queryKey: key });
-      queryClient.refetchQueries({ queryKey: key });
 
       toast("success");
       options.onSuccess?.(res, variables, context);

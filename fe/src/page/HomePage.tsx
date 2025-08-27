@@ -93,7 +93,7 @@ const HomePage = () => {
               >
                 <span className="">Lost</span>
                 <span className="flex min-w-2.5 px-1.5 py-0.5 items-center justify-center rounded-sm bg-primary/75 text-xs text-white">
-                  {data?.counts?.lost}
+                  {data?.counts?.lost ?? 0}
                 </span>
               </Button>
               <Button
@@ -105,7 +105,7 @@ const HomePage = () => {
               >
                 <span className="">Found</span>
                 <span className="flex min-w-2.5 px-1.5 py-0.5 items-center justify-center rounded-sm bg-primary/75 text-xs text-white">
-                  {data?.counts?.found}
+                  {data?.counts?.found ?? 0}
                 </span>
               </Button>
             </div>

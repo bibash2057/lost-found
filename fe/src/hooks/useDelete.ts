@@ -19,7 +19,6 @@ const useDelete = <TData = any, TVariables = any>(
     },
     ...options,
     onSuccess: (res, variables, context) => {
-      queryClient.refetchQueries({ queryKey: key });
       queryClient.invalidateQueries({ queryKey: key });
       toast("success");
       if (options.onSuccess) {
