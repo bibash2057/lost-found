@@ -2,7 +2,7 @@ const Item = require("../models/Item.models");
 const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
 const uploadToCloudinary = require("../utils/cloudinaryUpload");
-const redisClient = require("../utils/redis");
+// const redisClient = require("../utils/redis");
 
 exports.reportItem = asyncHandler(async (req, res) => {
   const { id } = req.user;
@@ -72,6 +72,9 @@ exports.reportItem = asyncHandler(async (req, res) => {
   });
 
   const savedItem = await newItem.save();
+
+  // await redisClient.del(`reportedItem:${id}`);
+  // await redisClient.del("allItems");
 
   res.status(201).json({
     success: true,
@@ -160,6 +163,10 @@ exports.updateReportItem = asyncHandler(async (req, res) => {
     }
   );
 
+  // await redisClient.del(`item:${id}`);
+  // await redisClient.del(`reportedItem:${userId}`);
+  // await redisClient.del("allItems");
+
   res.status(200).json({
     success: true,
     message: "Item updated successfully",
@@ -182,14 +189,12 @@ exports.getAllItem = asyncHandler(async (req, res) => {
     ];
   }
 
-  const cacheKey = `items:${JSON.stringify(query)}`;
+  const cacheKey = "allItems";
+  // const cached = await redisClient.get(cacheKey);
 
-  const cachedData = await redisClient.get(cacheKey);
-
-  if (cachedData) {
-    const parsed = JSON.parse(cachedData);
-    return res.status(200).json(parsed);
-  }
+  // if (cached) {
+  //   return res.status(200).json(JSON.parse(cached));
+  // }
 
   const items = await Item.find(query)
     .populate("postedBy", "name email")
@@ -212,7 +217,7 @@ exports.getAllItem = asyncHandler(async (req, res) => {
     },
   };
 
-  await redisClient.setEx(cacheKey, 3000, JSON.stringify(response));
+  // await redisClient.setEx(cacheKey, 3600, JSON.stringify(response));
 
   res.status(200).json(response);
 });
@@ -229,12 +234,12 @@ exports.getItemById = asyncHandler(async (req, res) => {
 
   const cacheKey = `item:${id}`;
 
-  const cachedItem = await redisClient.get(cacheKey);
+  // const cachedItem = await redisClient.get(cacheKey);
 
-  if (cachedItem) {
-    // console.log("this is from redis");
-    return res.status(200).json(JSON.parse(cachedItem));
-  }
+  // if (cachedItem) {
+  //   console.log("this is from redis");
+  //   return res.status(200).json(JSON.parse(cachedItem));
+  // }
 
   const item = await Item.findById(id)
     .populate({
@@ -259,7 +264,7 @@ exports.getItemById = asyncHandler(async (req, res) => {
     data: item,
   };
 
-  await redisClient.setEx(cacheKey, 3000, JSON.stringify(response));
+  // await redisClient.setEx(cacheKey, 3000, JSON.stringify(response));
 
   res.status(200).json(response);
 });
@@ -269,12 +274,12 @@ exports.getMyReportedItems = asyncHandler(async (req, res) => {
 
   const cacheKey = `reportedItem:${id}`;
 
-  const cached = await redisClient.get(cacheKey);
+  // const cached = await redisClient.get(cacheKey);
 
-  if (cached) {
-    console.log("direct from redis");
-    return res.status(200).json(JSON.parse(cached));
-  }
+  // if (cached) {
+  //   console.log("direct from redis");
+  //   return res.status(200).json(JSON.parse(cached));
+  // }
 
   const reportedItems = await Item.find({ postedBy: id })
     .sort({ createdAt: -1 })
@@ -285,7 +290,7 @@ exports.getMyReportedItems = asyncHandler(async (req, res) => {
     message: "Reported Items fetched successfully!",
     data: reportedItems,
   };
-  await redisClient.setEx(cacheKey, 3600, JSON.stringify(response));
+  // await redisClient.setEx(cacheKey, 3600, JSON.stringify(response));
 
   res.status(200).json(response);
 });
@@ -316,6 +321,11 @@ exports.delteItem = asyncHandler(async (req, res) => {
   }
 
   const deleteItem = await Item.findByIdAndDelete(id);
+
+  // await redisClient.del(`item:${id}`);
+  // await redisClient.del(`reportedItem:${req.user.id}`);
+  // await redisClient.del("allItems");
+
   res.status(200).json({
     success: true,
     message: "Reported item deleted successfully",
